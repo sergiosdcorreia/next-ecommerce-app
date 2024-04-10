@@ -20,4 +20,34 @@ model Product {
   isAvailableForPurchase Boolean
   createdAt DateTime
   updatedAt DateTime
+  orders Order[]
+  downloadVerification DownloadVerification[]
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order Order[]
+}
+
+model Order {
+  id String @id @default(uuid())
+  pricePaidInCents Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  productId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model DownloadVerification {
+  id String @id @default(uuid())
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  productId String
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
