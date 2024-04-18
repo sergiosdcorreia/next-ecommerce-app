@@ -12,6 +12,7 @@ import {
 import { formatCurrency } from "@/lib/formatters";
 import {
   Elements,
+  LinkAuthenticationElement,
   PaymentElement,
   useElements,
   useStripe,
@@ -69,7 +70,8 @@ export function CheckoutForm({ product, clientSecret }: CheckoutFormProps) {
 function Form({ priceInCents }: { priceInCents: number }) {
   const stripe = useStripe();
   const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -80,12 +82,21 @@ function Form({ priceInCents }: { priceInCents: number }) {
 
     // TODO: Check for existing order
 
-    stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
-      },
-    });
+    stripe
+      .confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
+        },
+      })
+      .then(({ error }) => {
+        if (error.type === "card_error" || error.type === "validation_error") {
+          setErrorMessage(error.message);
+        } else {
+          setErrorMessage("An unknown error ocurred");
+        }
+      })
+      .finally(() => setIsLoading(false));
   }
 
   return (
@@ -93,10 +104,17 @@ function Form({ priceInCents }: { priceInCents: number }) {
       <Card>
         <CardHeader>
           <CardTitle>Checkout</CardTitle>
-          <CardDescription className="text-destructive">Error</CardDescription>
+          {errorMessage && (
+            <CardDescription className="text-destructive">
+              {errorMessage}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <PaymentElement />
+          <div className="mt-4">
+            <LinkAuthenticationElement />
+          </div>
         </CardContent>
         <CardFooter>
           <Button
