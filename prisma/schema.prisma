@@ -29,7 +29,7 @@ model User {
   email String @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  order Order[]
+  orders Order[]
 }
 
 model Order {
