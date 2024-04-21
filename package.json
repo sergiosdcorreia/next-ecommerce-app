@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx prisma generate",
+    "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "email": "cp .env ./node_modules/react-email && email dev --dir src/email --port 3001"
+    "email": "cp .env ./node_modules/react-email && email dev --dir src/email --port 3001",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.12.1",
